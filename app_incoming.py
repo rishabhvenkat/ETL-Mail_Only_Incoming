@@ -14,7 +14,6 @@ response_df = get_response_data()
 
 # Convert date/time
 email_df['received_date'] = pd.to_datetime(email_df['received_date'])
-pass
 
 # Count by Date
 count_by_date = email_df.groupby(email_df['received_date'].dt.date).size().reset_index(name='Email Count')
@@ -28,7 +27,7 @@ st.line_chart(folder_counts.T)
 
 # Merge for Response Analytics
 merged = pd.merge(email_df, response_df, on='thread_id', suffixes=('', '_resp'))
-merged['response_delay'] = merged['response_time_seconds']/ 60
+merged['response_delay'] = merged['response_time_seconds'] / 60
 
 # Response Rate
 response_rate = len(merged['email_id'].unique()) / len(email_df['email_id'].unique()) * 100
@@ -43,4 +42,25 @@ st.subheader("Response Rate by Folder")
 response_rate_by_folder = merged.groupby('folder').size() / email_df.groupby('folder').size() * 100
 st.dataframe(response_rate_by_folder.reset_index(name="Response Rate (%)"))
 
+# ✅ NEW SECTION: Response Rate by Folder by Date
+st.subheader("Response Rate by Folder by Date")
+
+# Add date columns
+email_df['date'] = email_df['received_date'].dt.date
+merged['date'] = merged['received_date'].dt.date
+
+# Total emails per folder per date
+total_emails_by_folder_date = email_df.groupby(['folder', 'date']).size().rename("Total Emails")
+
+# Responded emails per folder per date
+responded_emails_by_folder_date = merged.groupby(['folder', 'date']).size().rename("Responded Emails")
+
+# Combine and calculate response rate
+response_rate_by_folder_date = pd.concat([total_emails_by_folder_date, responded_emails_by_folder_date], axis=1).fillna(0)
+response_rate_by_folder_date['Response Rate (%)'] = (
+    response_rate_by_folder_date['Responded Emails'] / response_rate_by_folder_date['Total Emails'] * 100
+)
+
+# Display
+st.dataframe(response_rate_by_folder_date.reset_index())
 
