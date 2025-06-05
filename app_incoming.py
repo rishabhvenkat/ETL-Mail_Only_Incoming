@@ -64,3 +64,10 @@ response_rate_by_folder_date['Response Rate (%)'] = (
 # Display
 st.dataframe(response_rate_by_folder_date.reset_index())
 
+# ✅ NEW SECTION: Avg. Response Time by Folder by Date
+st.subheader("Avg. Response Time (minutes) by Folder by Date")
+
+avg_response_time_by_folder_date = merged.groupby(['folder', 'date'])['response_delay'].mean().reset_index()
+avg_response_time_by_folder_date.rename(columns={'response_delay': 'Avg. Response Time (min)'}, inplace=True)
+
+st.dataframe(avg_response_time_by_folder_date)
