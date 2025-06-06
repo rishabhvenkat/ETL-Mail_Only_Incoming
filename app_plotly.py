@@ -59,7 +59,7 @@ if selected_folders_to_compare:
         x='date',
         y='Email Count',
         color='folder',
-        barmode='group',
+        barmode='relative',
         title="Email Volume Comparison by Folder Over Time"
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -73,7 +73,7 @@ fig_date = px.bar(count_by_date, x='received_date', y='Email Count', title=f"Ema
 st.plotly_chart(fig_date, use_container_width=True)
 
 # Email Count per Folder by Date
-st.subheader("Email Count per Folder by Date")
+st.subheader("Email Count per Folder by Date - All Folders")
 folder_counts = (
     all_email_df.groupby([all_email_df['received_date'].dt.date, 'folder'])
     .size()
@@ -84,8 +84,8 @@ fig_folder = px.bar(
     x='received_date',
     y='Email Count',
     color='folder',
-    barmode='group',
-    title="Email Count per Folder by Date"
+    barmode='relative',
+    title="Email Count per Folder by Date (Comparison)"
 )
 st.plotly_chart(fig_folder, use_container_width=True)
 
@@ -110,19 +110,19 @@ else:
     st.warning("No responded emails in selected range for average response time.")
 
 # Response Rate by Folder
-st.subheader("Response Rate by Folder")
+st.subheader(" Avg. Response Rate by Folder")
 response_rate_by_folder = merged.groupby('folder').size() / all_email_df.groupby('folder').size() * 100
 response_rate_by_folder = response_rate_by_folder.reset_index(name="Response Rate (%)")
 fig_response_folder = px.bar(
     response_rate_by_folder,
     x='folder',
     y='Response Rate (%)',
-    title="Response Rate by Folder"
+    title=" Avg. Response Rate by Folder (Bar plot)"
 )
 st.plotly_chart(fig_response_folder, use_container_width=True)
 
 # Response Rate by Folder by Date
-st.subheader("Response Rate by Folder by Date")
+st.subheader("Avg. Response Rate by Folder by Date")
 total_emails = email_df.groupby(['folder', 'date']).size().rename("Total Emails")
 responded_emails = merged.groupby(['folder', 'date']).size().rename("Responded Emails")
 
@@ -137,8 +137,8 @@ fig_response_trend = px.bar(
     x='date',
     y='Response Rate (%)',
     color='folder',
-    barmode='group',
-    title="Response Rate by Folder by Date"
+    barmode='relative',
+    title="Avg. Response Rate by Folder by Date (Bar plot)"
 )
 st.plotly_chart(fig_response_trend, use_container_width=True)
 
@@ -152,7 +152,27 @@ fig_avg_resp = px.bar(
     x='date',
     y='Avg. Response Time (min)',
     color='folder',
-    barmode='group',
-    title="Avg. Response Time by Folder by Date"
+    barmode='relative',
+    title="Avg. Response Time by Folder by Date (Bar plot)"
 )
 st.plotly_chart(fig_avg_resp, use_container_width=True)
+
+# Responded  Emails Count by Folder by Date
+st.subheader("Responded Emails per Folder by Date")
+
+responded_counts = (
+    merged.groupby(['date', 'folder'])
+    .size()
+    .reset_index(name='Responded Emails')
+)
+
+fig_responded_counts = px.bar(
+    responded_counts,
+    x = 'date',
+    y = 'Responded Emails',
+    color = 'folder',
+    barmode = 'relative',
+    title = 'Responded Emails per Folder by Date (Bar plot)'
+)
+
+st.plotly_chart(fig_responded_counts, use_container_width = True)
